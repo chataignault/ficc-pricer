@@ -1,0 +1,53 @@
+cabal-version:      2.4
+name:               fx-pricer
+version:            0.1.0.0
+synopsis:           Minimalist FX pricing algebra
+description:        Compositional algebra for pricing FX instruments
+license:            BSD-3-Clause
+author:             FX Team
+maintainer:         fx@example.com
+category:           Finance
+build-type:         Simple
+
+common warnings
+    ghc-options: -Wall
+
+library
+    import:           warnings
+    exposed-modules:  FX.Algebra.Contract
+                    , FX.Algebra.Observable
+                    , FX.Algebra.Combinators
+                    , FX.Pricing.MarketData
+                    , FX.Pricing.Core
+                    , FX.Pricing.BlackScholes
+                    , FX.Examples.Products
+    build-depends:    base ^>=4.18.0.0
+                    , containers ^>=0.6.7
+                    , time ^>=1.12.2
+    hs-source-dirs:   src
+    default-language: Haskell2010
+    default-extensions: GADTs
+                      , DeriveFunctor
+                      , StandaloneDeriving
+
+executable fx-pricer-example
+    import:           warnings
+    main-is:          Main.hs
+    build-depends:    base ^>=4.18.0.0
+                    , fx-pricer
+                    , time
+                    , containers
+    hs-source-dirs:   app
+    default-language: Haskell2010
+
+test-suite fx-pricer-test
+    import:           warnings
+    default-language: Haskell2010
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Test.hs
+    build-depends:    base ^>=4.18.0.0
+                    , fx-pricer
+                    , QuickCheck ^>=2.14.3
+                    , containers
+                    , time
