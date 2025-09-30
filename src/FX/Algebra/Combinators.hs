@@ -60,8 +60,7 @@ knockOutOption
   -> Currency      -- ^ Foreign currency
   -> Contract
 knockOutOption dir level optType strike expiry ccyDom ccyFor =
-  let spotObs = SpotRate (show ccyDom) (show ccyFor)
-      -- Knock-out = vanilla - knock-in
+  let -- Knock-out = vanilla - knock-in
       vanilla = EurOption optType strike expiry ccyDom ccyFor
       knockIn = knockInOption dir level optType strike expiry ccyDom ccyFor
   in Combine vanilla (Scale (-1) knockIn)

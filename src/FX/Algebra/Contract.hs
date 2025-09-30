@@ -14,7 +14,7 @@ import FX.Algebra.Observable (Observable)
 
 -- | Supported currencies
 data Currency = USD | EUR | GBP | JPY | CHF | AUD | CAD
-  deriving (Show, Eq, Ord)
+  deriving (Show, Read, Eq, Ord)
 
 -- | Option type
 data OptionType = Call | Put
@@ -50,8 +50,6 @@ data Contract where
 
   -- | Conditional execution based on an observable
   When      :: Observable Bool -> Contract -> Contract
-
-deriving instance Show Contract
 
 -- | Monoid instance for portfolio combination
 instance Semigroup Contract where

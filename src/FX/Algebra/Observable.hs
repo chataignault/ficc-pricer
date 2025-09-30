@@ -6,6 +6,7 @@ module FX.Algebra.Observable
   , Level
   ) where
 
+-- import Control.Applicative (liftA2)
 import Data.Time (Day)
 
 -- | Direction for barriers
@@ -35,8 +36,6 @@ data Observable a where
   -- | Apply function observable to value observable
   Apply     :: Observable (a -> b) -> Observable a -> Observable b
 
-deriving instance Show a => Show (Observable a)
-
 -- | Functor instance for Observable
 instance Functor Observable where
   fmap = Map
@@ -60,7 +59,3 @@ instance Num a => Num (Observable a) where
 instance Fractional a => Fractional (Observable a) where
   (/) = liftA2 (/)
   fromRational = pure . fromRational
-
--- | Helper for lifting binary operations
-liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
-liftA2 f a b = f <$> a <*> b
