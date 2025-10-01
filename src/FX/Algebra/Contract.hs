@@ -51,9 +51,24 @@ data Contract where
   -- | Conditional execution based on an observable
   When      :: Observable Bool -> Contract -> Contract
 
+instance Show Contract where
+  show Zero = "Zero"
+  show (Spot c1 c2) = "Spot " ++ show c1 ++ " " ++ show c2
+  show (Forward d r c1 c2) = "Forward " ++ show d ++ " " ++ show r ++ " " ++ show c1 ++ " " ++ show c2
+  show (EurOption ot k d c1 c2) = "EurOption " ++ show ot ++ " " ++ show k ++ " " ++ show d ++ " " ++ show c1 ++ " " ++ show c2
+  show (ZCB c d) = "ZCB " ++ show c ++ " " ++ show d
+  show (Scale n c) = "Scale " ++ show n ++ " (" ++ show c ++ ")"
+  show (Combine c1 c2) = "Combine (" ++ show c1 ++ ") (" ++ show c2 ++ ")"
+  show (When _ c) = "When <obs> (" ++ show c ++ ")"
+
 -- | Monoid instance for portfolio combination
+-- Smart constructor that eliminates Zero (but doesn't flatten for structural preservation)
 instance Semigroup Contract where
-  (<>) = Combine
+  Zero <> c = c
+  c <> Zero = c
+  Scale _ Zero <> c = c
+  c <> Scale _ Zero = c
+  c1 <> c2 = Combine c1 c2
 
 instance Monoid Contract where
   mempty = Zero

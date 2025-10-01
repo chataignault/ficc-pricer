@@ -71,11 +71,11 @@ instance Arbitrary Day where
 
 -- | Property: Left identity
 prop_leftIdentity :: Contract -> Bool
-prop_leftIdentity c = Zero <> c `eqContract` c
+prop_leftIdentity c = (Zero <> c) `eqContract` c
 
 -- | Property: Right identity
 prop_rightIdentity :: Contract -> Bool
-prop_rightIdentity c = c <> Zero `eqContract` c
+prop_rightIdentity c = (c <> Zero) `eqContract` c
 
 -- | Property: Associativity
 prop_associativity :: Contract -> Contract -> Contract -> Bool
@@ -132,25 +132,76 @@ prop_scaleDistributive alpha c1 c2 =
      abs (lhs - rhs) < 1e-8
 
 -- | Structural equality for contracts (ignoring observables for simplicity)
+-- Handles associativity and commutativity of Combine by comparing multisets
 eqContract :: Contract -> Contract -> Bool
-eqContract Zero Zero = True
-eqContract (Spot c1 c2) (Spot c1' c2') = c1 == c1' && c2 == c2'
-eqContract (Forward d r c1 c2) (Forward d' r' c1' c2') =
-  d == d' && r == r' && c1 == c1' && c2 == c2'
-eqContract (ZCB c d) (ZCB c' d') = c == c' && d == d'
-eqContract (Scale alpha c) (Scale alpha' c') = alpha == alpha' && c `eqContract` c'
-eqContract (Combine c1 c2) (Combine c1' c2') = c1 `eqContract` c1' && c2 `eqContract` c2'
-eqContract (Combine c1 c2) (Combine c2' c1') = c1 `eqContract` c1' && c2 `eqContract` c2'  -- commutativity
-eqContract _ _ = False
+eqContract c1 c2 = multisetEq (flatten c1) (flatten c2)
+  where
+    -- Flatten Combine trees into a list of atomic contracts
+    flatten :: Contract -> [Contract]
+    flatten Zero = []
+    flatten (Scale _ Zero) = []
+    flatten (Combine a b) = flatten a ++ flatten b
+    flatten c = [c]
+
+    -- Check if two multisets are equal (order-independent comparison)
+    multisetEq :: [Contract] -> [Contract] -> Bool
+    multisetEq [] [] = True
+    multisetEq [] _ = False
+    multisetEq _ [] = False
+    multisetEq (x:xs) ys = case removeFirst x ys of
+      Nothing -> False
+      Just ys' -> multisetEq xs ys'
+
+    -- Remove first occurrence of element from list
+    removeFirst :: Contract -> [Contract] -> Maybe [Contract]
+    removeFirst _ [] = Nothing
+    removeFirst x (y:ys)
+      | atomicEq x y = Just ys
+      | otherwise = (y:) <$> removeFirst x ys
+
+    -- Equality for atomic (non-Combine) contracts
+    atomicEq :: Contract -> Contract -> Bool
+    atomicEq Zero Zero = True
+    atomicEq (Scale _ Zero) Zero = True
+    atomicEq Zero (Scale _ Zero) = True
+    atomicEq (Spot c1 c2) (Spot c1' c2') = c1 == c1' && c2 == c2'
+    atomicEq (Forward d r c1 c2) (Forward d' r' c1' c2') =
+      d == d' && r == r' && c1 == c1' && c2 == c2'
+    atomicEq (ZCB c d) (ZCB c' d') = c == c' && d == d'
+    atomicEq (Scale a c1) (Scale a' c2) = a == a' && eqContract c1 c2
+    atomicEq (EurOption ot k d c1 c2) (EurOption ot' k' d' c1' c2') =
+      ot == ot' && k == k' && d == d' && c1 == c1' && c2 == c2'
+    atomicEq _ _ = False
 
 -- | Test market data
 testMarket :: MarketState
 testMarket = MarketState
   { spotRates = Map.fromList
+      -- Major pairs vs USD
       [ ((EUR, USD), 1.10)
       , ((GBP, USD), 1.25)
       , ((USD, JPY), 110.0)
+      , ((USD, CHF), 0.92)
+      , ((AUD, USD), 0.74)
+      , ((USD, CAD), 1.27)
+      -- EUR crosses
       , ((EUR, GBP), 0.88)
+      , ((EUR, JPY), 121.0)
+      , ((EUR, CHF), 1.01)
+      , ((EUR, AUD), 1.49)
+      , ((EUR, CAD), 1.40)
+      -- GBP crosses
+      , ((GBP, JPY), 137.5)
+      , ((GBP, CHF), 1.15)
+      , ((GBP, AUD), 1.69)
+      , ((GBP, CAD), 1.59)
+      -- Other crosses
+      , ((CHF, JPY), 119.6)
+      , ((AUD, JPY), 81.5)
+      , ((CAD, JPY), 86.6)
+      , ((AUD, CHF), 0.80)
+      , ((AUD, CAD), 0.94)
+      , ((CHF, CAD), 1.38)
       ]
   , discountCurves = Map.fromList
       [ (USD, \_ -> 0.98)
