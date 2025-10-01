@@ -45,4 +45,5 @@ portfolio = Combine forward option
 
 ## References
 - https://en.wikipedia.org/wiki/Generalized_algebraic_data_type
+- https://wiki.haskell.org/Learn_Haskell_in_10_minutes
 

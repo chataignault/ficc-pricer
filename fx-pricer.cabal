@@ -3,11 +3,6 @@ name:               fx-pricer
 version:            0.1.0.0
 synopsis:           Minimalist FX pricing algebra
 description:        Compositional algebra for pricing FX instruments
-license:            BSD-3-Clause
-author:             FX Team
-maintainer:         fx@example.com
-category:           Finance
-build-type:         Simple
 
 common warnings
     ghc-options: -Wall
