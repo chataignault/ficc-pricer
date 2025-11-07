@@ -114,3 +114,28 @@ See `fx_pricer/` for implementation details and examples.
 
 - [ ] Branch [Quantlib](https://github.com/lballabio/QuantLib/tree/master) and compile for numerical verification, 
 
+
+## Overview
+
+### Interest rate definitions
+- Linear, anually compounded, continuously compounded
+- spot or forward
+
+### Short rate models
+- Vasicek
+- Extended Vasicek Hull-White
+- CIR
+- General Hull-White
+- CIR++
+- Black Karasinski
+
+### Forward rate models
+- Heath-Jarrow-Morton
+- Jamshidian decomposition (swaption pricing)
+- LIBOR
+- Extended LMM :
+  - Levy, 
+  - SABR, 
+  - shifted,
+  - multiple-curve
+
