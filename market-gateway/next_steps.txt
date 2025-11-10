@@ -1,0 +1,30 @@
+Next Steps for Market Gateway
+==============================
+
+1. Define pricer.proto schema
+   - Follow ARCHITECTURE.md specification (lines 44-380)
+   - Include: Contract, MarketSnapshot, PricingParams messages
+   - Define FXPricer service with Price, UpdateMarket, Health RPCs
+
+2. Generate Go protobuf code
+   protoc --go_out=pkg/proto --go-grpc_out=pkg/proto \
+          --go_opt=paths=source_relative \
+          --go-grpc_opt=paths=source_relative \
+          pricer.proto
+
+3. Implement gRPC calls in internal/client/pricer.go
+   - Replace placeholder methods with actual protobuf calls
+   - Add contract-to-proto and market-to-proto converters
+   - Update CLI command handlers to use real pricing service
+
+4. Build Haskell gRPC server
+   - Install proto-lens and grpc-haskell dependencies
+   - Generate Haskell protobuf code from pricer.proto
+   - Implement FXPricer service mapping to existing pricing engine
+   - Add server startup in main executable
+
+5. Create integration tests
+   - Test end-to-end: Go client -> Haskell server -> response
+   - Verify EUR/USD option pricing matches expected values
+   - Test market data updates and health checks
+   - Benchmark <50ms latency target
