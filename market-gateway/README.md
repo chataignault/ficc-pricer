@@ -1,12 +1,12 @@
 # Market Gateway
 
-Go client for the FX Pricing Service - orchestrates pricing requests and manages market data for the Haskell FX pricer.
+Client for the FICC pricer - orchestrates pricing requests and manages market data.
 
 ## Overview
 
 The Market Gateway is a Go application that acts as the orchestrator between market data sources and the Haskell pricing service. It communicates via gRPC/Protocol Buffers to:
 
-- Send price requests for FX contracts (spots, forwards, options)
+- Send price requests for FX contracts (spots, forwards, options), Requests-for-Quotes,
 - Push market data updates (spot rates, discount curves, volatility surfaces)
 - Manage market data snapshots
 - Process price responses
@@ -58,10 +58,6 @@ market-gateway/
 ## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/leonc/ficc-pricer.git
-cd ficc-pricer/market-gateway
-
 # Download dependencies
 go mod download
 
@@ -146,7 +142,7 @@ market:
 
 ## Development Status
 
-### ✅ Completed (Phase 1)
+### Completed (Phase 1)
 
 - [x] Go module initialization
 - [x] Directory structure following Go standard layout
@@ -157,7 +153,7 @@ market:
 - [x] Configuration management with Viper
 - [x] Example usage code
 
-### 🚧 Next Steps (Requires Protobuf Schema)
+### Next Steps (Requires Protobuf Schema)
 
 The following features are blocked until the protobuf schema is defined:
 
@@ -179,7 +175,7 @@ The following features are blocked until the protobuf schema is defined:
 5. **Implement CLI command handlers** with actual gRPC calls
 6. **Add integration tests** with the Haskell service
 
-### 📋 Future Enhancements (Phase 2+)
+### Future Enhancements (Phase 2+)
 
 - [ ] Pillar-based discount curves with interpolation
 - [ ] Volatility grids (strike/maturity surface)
@@ -237,38 +233,9 @@ go build -ldflags="-s -w" -o bin/market-gateway ./cmd/market-gateway
 GOOS=linux GOARCH=amd64 go build -o bin/market-gateway-linux ./cmd/market-gateway
 ```
 
-## Troubleshooting
-
-### Connection Refused
-
-If you see `connection refused` when running commands:
-- Ensure the Haskell pricing service is running
-- Check the service is listening on `localhost:50051`
-- Verify firewall settings
-
-### Import Errors
-
-If you see import errors after adding dependencies:
-```bash
-go mod tidy
-go mod download
-```
-
-## Contributing
-
-When adding new features:
-1. Follow Go standard layout conventions
-2. Add tests for new functionality
-3. Update this README with new commands/features
-4. Run `go fmt` and `go vet` before committing
-
 ## References
 
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - System architecture and protocol design
 - [Go Project Layout](https://github.com/golang-standards/project-layout)
 - [gRPC Go Quick Start](https://grpc.io/docs/languages/go/quickstart/)
 - [Protocol Buffers Guide](https://developers.google.com/protocol-buffers/docs/overview)
-
-## License
-
-See the main project LICENSE file.
