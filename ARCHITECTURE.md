@@ -4,7 +4,7 @@
 
 Distributed pricing service where:
 - **Go application**: Orchestrates pricing requests and manages market data updates
-- **Haskell service**: Performs FX derivative pricing computations
+- **Haskell service**: Performs FX/rates derivative pricing computations
 - **Communication**: gRPC with Protocol Buffers
 - **Latency target**: <50ms end-to-end
 
@@ -29,13 +29,13 @@ Distributed pricing service where:
 
 | Criteria | JSON/HTTP | gRPC + Protobuf | Kafka + Avro |
 |----------|-----------|-----------------|--------------|
-| **Latency** | ~100ms | ~10-20ms ⭐ | ~200ms+ |
-| **Type Safety** | Runtime validation | Schema-enforced ⭐ | Schema-enforced |
-| **Operational Complexity** | Low ⭐ | Low ⭐ | High (cluster mgmt) |
-| **Go Support** | Excellent | Excellent ⭐ | Good |
-| **Haskell Support** | Excellent | Good ⭐ | Limited |
-| **Streaming** | No | Bidirectional ⭐ | Yes |
-| **Infrastructure** | None ⭐ | None ⭐ | Kafka + ZooKeeper |
+| **Latency** | ~100ms | ~10-20ms | ~200ms+ |
+| **Type Safety** | Runtime validation | Schema-enforced  | Schema-enforced |
+| **Operational Complexity** | Low  | Low  | High (cluster mgmt) |
+| **Go Support** | Excellent | Excellent  | Good |
+| **Haskell Support** | Excellent | Good  | Limited |
+| **Streaming** | No | Bidirectional  | Yes |
+| **Infrastructure** | None  | None  | Kafka + ZooKeeper |
 
 **Decision**: gRPC + Protobuf offers the best balance for point-to-point, low-latency communication without infrastructure overhead.
 
