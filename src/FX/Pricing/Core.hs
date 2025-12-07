@@ -25,11 +25,18 @@ price contract market params = case contract of
 
   -- Forward contract at fixed rate
   Forward maturity fixedRate ccy1 ccy2 ->
-    let timeToMaturity = yearFrac (valuationDate params) maturity
-        fwdRate = getForwardRate market ccy1 ccy2 maturity
-        df = getDiscountFactor market (numeraire params) maturity
-        -- Value = (forward rate - fixed rate) * discount factor
-    in (fwdRate - fixedRate) * df
+    -- let timeToMaturity = yearFrac (valuationDate params) maturity
+    --     fwdRate = getForwardRate market ccy1 ccy2 maturity
+    --     df = getDiscountFactor market (numeraire params) maturity
+    --     -- Value = (forward rate - fixed rate) * discount factor
+    -- in (fwdRate - fixedRate) * df
+    
+    -- Replication argument with FOR and DOM Zero-coupon bonds
+    let bfor = price (ZCB ccy2 maturity) market params
+        bdom = price (ZCB ccy1 maturity) market params
+        spotPrice = price (Spot ccy1 ccy2) market params
+        -- Forward rate = Spot * (B_for / B_dom), Value = (fwd - fixed) * B_dom
+    in bfor / bdom * spotPrice
 
   -- European option - delegate to Black-Scholes
   EurOption optType strike expiry ccy1 ccy2 ->
