@@ -94,6 +94,12 @@ main = do
   putStrLn $ "  difference = $" ++ show (abs (pCombined - (p1 + p2)))
   putStrLn ""
 
+  putStrLn "=== Example 9: Custom example ===="
+  let f = Mult (Div (ZCB EUR maturity) (ZCB USD maturity)) (Spot EUR USD)
+      pf = price f market params  
+  putStrLn $ " price forward with replication formula = $" ++ show pf
+  putStrLn ""
+  
   putStrLn "Demo completed!"
 
 -- | Create sample market data

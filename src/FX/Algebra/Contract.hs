@@ -44,6 +44,12 @@ data Contract where
 
   -- | Scale a contract by a notional amount
   Scale     :: Double -> Contract -> Contract
+  
+  -- | Multiply two contracts by value
+  Mult      :: Contract -> Contract -> Contract
+  
+  -- | Divide two contracts by value
+  Div       :: Contract -> Contract -> Contract
 
   -- | Combine two contracts into a portfolio
   Combine   :: Contract -> Contract -> Contract
@@ -58,6 +64,8 @@ instance Show Contract where
   show (EurOption ot k d c1 c2) = "EurOption " ++ show ot ++ " " ++ show k ++ " " ++ show d ++ " " ++ show c1 ++ " " ++ show c2
   show (ZCB c d) = "ZCB " ++ show c ++ " " ++ show d
   show (Scale n c) = "Scale " ++ show n ++ " (" ++ show c ++ ")"
+  show (Mult c1 c2) = "Multiply (" ++ show c1 ++ ") (" ++ show c2 ++ ")"
+  show (Div c1 c2) = "Divide (" ++ show c1 ++ ") (" ++ show c2 ++ ")"
   show (Combine c1 c2) = "Combine (" ++ show c1 ++ ") (" ++ show c2 ++ ")"
   show (When _ c) = "When <obs> (" ++ show c ++ ")"
 
@@ -72,3 +80,4 @@ instance Semigroup Contract where
 
 instance Monoid Contract where
   mempty = Zero
+  

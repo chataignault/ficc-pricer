@@ -46,6 +46,14 @@ price contract market params = case contract of
     alpha * price c market params
 
   -- Combination law: addition is pricing under portfolio combination
+  Mult c1 c2 ->
+    price c1 market params * price c2 market params
+
+  -- Combination law: addition is pricing under portfolio combination
+  Div c1 c2 ->
+    price c1 market params / price c2 market params
+
+  -- Combination law: addition is pricing under portfolio combination
   Combine c1 c2 ->
     price c1 market params + price c2 market params
 
