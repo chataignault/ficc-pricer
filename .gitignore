@@ -3,3 +3,6 @@
 # BUILD FOLDERS
 # ----------------------------------------------------------------------------
 dist-newstyle
+
+# Rust
+repo-analytics/target

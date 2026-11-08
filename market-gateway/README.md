@@ -209,6 +209,26 @@ The market manager supports:
 
 All market data updates are thread-safe using read-write locks.
 
+### Repo market data (for the Rust `repo-analytics` crate)
+
+The same manager also holds the repo market: GC repo curves by currency,
+per-ISIN specials, bond static, clean prices and haircuts, and overnight
+fixing histories (SOFR, €STR). Everything sits under the same lock, so a
+snapshot is always consistent.
+
+```bash
+market-gateway repo export --asof 2026-11-09 --out snapshot.json   # simulated market
+market-gateway repo validate snapshot.json
+market-gateway repo export | (cd ../repo-analytics && \
+  cargo run --features serde --example repo_report_from_snapshot -- -)
+```
+
+The schema (`internal/market/repo.go`) is versioned and validated on export
+and on load. Tenor arithmetic (`internal/market/tenor.go`) mirrors the Rust
+crate, including month-end clamping (Jan 31 + 1M = Feb 28). The golden
+files in `internal/market/testdata/` are checked by both the Go and the Rust
+tests; regenerate them with `go test ./internal/market -update`.
+
 ## Testing
 
 ```bash

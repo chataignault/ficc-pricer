@@ -46,6 +46,7 @@ type Manager struct {
 	spotRates       map[string]SpotRate
 	discountCurves  map[string]DiscountCurve
 	volSurfaces     map[string]VolSurface
+	repo            repoState // see repo_manager.go
 	logger          *zap.Logger
 }
 
@@ -59,6 +60,7 @@ func NewManager(logger *zap.Logger) *Manager {
 		spotRates:      make(map[string]SpotRate),
 		discountCurves: make(map[string]DiscountCurve),
 		volSurfaces:    make(map[string]VolSurface),
+		repo:           newRepoState(),
 		logger:         logger,
 	}
 }

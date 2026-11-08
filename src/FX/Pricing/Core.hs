@@ -24,19 +24,15 @@ price contract market params = case contract of
     in rate * numRate
 
   -- Forward contract at fixed rate
+  -- Pays (F - K) units of ccy2 at maturity, F being the covered-interest-
+  -- parity forward F = S * B_ccy2 / B_ccy1 (same convention as the
+  -- Black-Scholes pricer). Replication: the payoff is (F - K) ccy2 ZCBs,
+  -- so the value is (F - K) * B_ccy2, converted to the numeraire.
+  -- Put-call parity holds: Forward K = Call K - Put K.
   Forward maturity fixedRate ccy1 ccy2 ->
-    -- let timeToMaturity = yearFrac (valuationDate params) maturity
-    --     fwdRate = getForwardRate market ccy1 ccy2 maturity
-    --     df = getDiscountFactor market (numeraire params) maturity
-    --     -- Value = (forward rate - fixed rate) * discount factor
-    -- in (fwdRate - fixedRate) * df
-    
-    -- Replication argument with FOR and DOM Zero-coupon bonds
-    let bfor = price (ZCB ccy2 maturity) market params
-        bdom = price (ZCB ccy1 maturity) market params
-        spotPrice = price (Spot ccy1 ccy2) market params
-        -- Forward rate = Spot * (B_for / B_dom), Value = (fwd - fixed) * B_dom
-    in bfor / bdom * spotPrice
+    let fwdRate = getForwardRate market ccy1 ccy2 maturity
+        bccy2 = price (ZCB ccy2 maturity) market params
+    in (fwdRate - fixedRate) * bccy2
 
   -- European option - delegate to Black-Scholes
   EurOption optType strike expiry ccy1 ccy2 ->

@@ -1,0 +1,19 @@
+[package]
+name = "repo-analytics"
+version = "0.1.0"
+edition = "2021"
+description = "Standalone repo market analytics: trade economics, implied repo & carry, margining, term structure"
+
+[dependencies]
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+
+[features]
+default = []
+# JSON market snapshots exported by the Go market-gateway (`repo export`).
+serde = ["dep:serde", "dep:serde_json", "chrono/serde"]
+
+[[example]]
+name = "repo_report_from_snapshot"
+required-features = ["serde"]
