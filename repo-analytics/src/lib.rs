@@ -5,12 +5,15 @@
 //! - [`risk`]: mark-to-market, margin calls, DV01s, specialness
 //! - [`curve`]: GC repo curve, forward repo, compounded overnight, specials
 //! - [`bond`]: fixed-coupon collateral valuation
+//! - `market` (feature `serde`): market snapshots exported by the Go market-gateway
 
 pub mod bond;
 pub mod carry;
 pub mod curve;
 pub mod daycount;
 pub mod error;
+#[cfg(feature = "serde")]
+pub mod market;
 pub mod risk;
 pub mod trade;
 
@@ -18,4 +21,6 @@ pub use bond::Bond;
 pub use curve::{compounded_overnight, RepoCurve, SpecialsCurve, Tenor};
 pub use daycount::DayCount;
 pub use error::{RepoError, Result};
+#[cfg(feature = "serde")]
+pub use market::{RepoMarket, RepoSnapshot};
 pub use trade::{Direction, Margin, RepoTrade};

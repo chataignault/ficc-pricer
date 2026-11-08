@@ -21,6 +21,10 @@ pub enum RepoError {
     UnknownTenor(String),
     /// Overnight fixings do not cover the requested period.
     MissingFixing(NaiveDate),
+    /// A market snapshot is malformed or inconsistent.
+    InvalidSnapshot(String),
+    /// Market data needed for a calculation is absent (unknown ISIN, currency, index...).
+    MissingMarketData(String),
 }
 
 impl fmt::Display for RepoError {
@@ -36,6 +40,8 @@ impl fmt::Display for RepoError {
             RepoError::UnsortedPillars => write!(f, "curve pillars must be strictly increasing"),
             RepoError::UnknownTenor(t) => write!(f, "unknown tenor: {t}"),
             RepoError::MissingFixing(d) => write!(f, "no overnight fixing on or before {d}"),
+            RepoError::InvalidSnapshot(msg) => write!(f, "invalid market snapshot: {msg}"),
+            RepoError::MissingMarketData(what) => write!(f, "missing market data: {what}"),
         }
     }
 }

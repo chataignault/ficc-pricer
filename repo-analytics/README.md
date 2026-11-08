@@ -6,6 +6,12 @@ pricer and the Go market gateway and does not depend on the contract algebra.
 ```bash
 cargo test
 cargo run --example repo_report
+
+# market data from the Go market-gateway (optional `serde` feature)
+cargo test --features serde
+cargo run --features serde --example repo_report_from_snapshot           # golden snapshot
+(cd ../market-gateway && go run ./cmd/market-gateway repo export --asof 2026-11-09) \
+  | cargo run --features serde --example repo_report_from_snapshot -- -
 ```
 
 ## Modules
@@ -18,6 +24,35 @@ cargo run --example repo_report
 | `carry`     | Forward price via repo, implied repo rate, carry |
 | `risk`      | Mark-to-market, margin calls (threshold / MTA), repo & collateral DV01, specialness |
 | `curve`     | GC repo curve from tenors, DFs, forward repo, compounded O/N, per-ISIN specials |
+| `market`    | *(feature `serde`)* Load and validate market-gateway JSON snapshots into the types above |
+
+## Market snapshots from the gateway
+
+`market-gateway repo export` writes a versioned JSON snapshot
+(`schema_version: 1`, schema in `market-gateway/internal/market/repo.go`):
+
+| Section     | Key      | Content |
+|-------------|----------|---------|
+| `asof`      |          | Business date the curve pillars are counted from |
+| `gc_curves` | currency | `day_count`, `pillars[{tenor, days, rate}]`, simple decimal rates |
+| `specials`  | ISIN     | `spread` below GC in the bond's currency |
+| `fixings`   | index    | `currency`, `day_count`, `fixings[{date, rate}]`, all dated on or before `asof` |
+| `bonds`     | ISIN     | `currency`, `coupon_rate`, `frequency`, `maturity`, `face`, `day_count` |
+| `prices`    | ISIN     | `clean` price per `face` (the crate computes accrued interest itself) |
+| `haircuts`  | ISIN     | `{"kind": "haircut", "value": 0.02}` or `{"kind": "initial_margin", "value": 1.02}` |
+
+`RepoMarket::from_json` / `from_reader` rejects unknown fields and schema
+versions, along with inconsistent data. It also checks that each pillar's
+`days` equals `Tenor::end_date(asof) - asof`, so Go and Rust cannot drift
+apart on tenor arithmetic. Lookups for an unknown ISIN, currency or index
+return `MissingMarketData` instead of silently falling back to GC.
+`RepoMarket::repo_trade` builds a `RepoTrade` starting at `asof` from the
+snapshot price, haircut and GC-minus-special rate.
+
+Both sides test against the same golden files in
+`market-gateway/internal/market/testdata/`, using `tests/gateway_snapshot.rs`
+here. After a deliberate schema change, regenerate them with
+`go test ./internal/market -update` and re-run `cargo test --features serde`.
 
 ## Formulas and conventions
 

@@ -23,6 +23,10 @@ cabal run fx-pricer-example
 
 # repo analytics (Rust)
 cd repo-analytics && cargo test && cargo run --example repo_report
+
+# gateway -> repo pricer bridge (JSON market snapshot)
+cd market-gateway && go test -race ./internal/market
+cd repo-analytics && cargo test --features serde
 ```
 
 ## Structure

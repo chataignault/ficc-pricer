@@ -20,7 +20,15 @@ pub enum Direction {
 }
 
 /// Collateral margining at inception.
+///
+/// With the `serde` feature it reads the snapshot form
+/// `{"kind": "haircut", "value": 0.02}` / `{"kind": "initial_margin", "value": 1.02}`.
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(tag = "kind", content = "value", rename_all = "snake_case")
+)]
 pub enum Margin {
     /// Cash = MV × (1 − h), e.g. `Haircut(0.02)`.
     Haircut(f64),
@@ -29,6 +37,19 @@ pub enum Margin {
 }
 
 impl Margin {
+    /// Checks the haircut is in [0, 1) or the initial margin is positive.
+    pub fn validate(self) -> Result<()> {
+        match self {
+            Margin::Haircut(h) if !(0.0..1.0).contains(&h) => Err(RepoError::InvalidInput(
+                format!("haircut {h} not in [0, 1)"),
+            )),
+            Margin::InitialMargin(m) if !(m > 0.0 && m.is_finite()) => Err(
+                RepoError::InvalidInput(format!("initial margin {m} must be > 0")),
+            ),
+            _ => Ok(()),
+        }
+    }
+
     /// Collateral value required to back `cash`.
     pub fn required_collateral(self, cash: f64) -> f64 {
         match self {
@@ -74,19 +95,7 @@ impl RepoTrade {
                 "clean price must be positive".into(),
             ));
         }
-        match self.margin {
-            Margin::Haircut(h) if !(0.0..1.0).contains(&h) => {
-                return Err(RepoError::InvalidInput(format!(
-                    "haircut {h} not in [0, 1)"
-                )));
-            }
-            Margin::InitialMargin(m) if m <= 0.0 => {
-                return Err(RepoError::InvalidInput(format!(
-                    "initial margin {m} must be > 0"
-                )));
-            }
-            _ => {}
-        }
+        self.margin.validate()?;
         if let Some(end) = self.end {
             check_dates(self.start, end)?;
         }
