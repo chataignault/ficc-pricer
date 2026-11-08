@@ -43,6 +43,17 @@ main = do
   putStrLn "\n8. Testing distributivity: Scale α (a <> b) = Scale α a <> Scale α b"
   quickCheck prop_scaleDistributive
 
+  putStrLn "\n=== Forward Pricing ==="
+
+  putStrLn "\n9. Testing put-call parity: Forward K = Call K - Put K"
+  quickCheck prop_putCallParity
+
+  putStrLn "\n10. Testing forward at the fair rate has zero value"
+  quickCheck prop_forwardAtFairRateIsZero
+
+  putStrLn "\n11. Testing forward value moves with the fixed rate"
+  quickCheck prop_forwardDependsOnStrike
+
   putStrLn "\nAll tests completed!"
 
 -- | Generate arbitrary contracts for testing
@@ -130,6 +141,42 @@ prop_scaleDistributive alpha c1 c2 =
   in counterexample
        ("LHS = " ++ show lhs ++ ", RHS = " ++ show rhs) $
      abs (lhs - rhs) < 1e-8
+
+-- | Forward test setup: EUR/USD (has a vol surface), maturity after valuation
+fwdMaturity :: Day
+fwdMaturity = fromGregorian 2025 12 31
+
+-- | Strikes around the EUR/USD forward
+genStrike :: Gen Double
+genStrike = choose (0.8, 1.4)
+
+-- | Property: a forward is a long call and a short put at the same strike
+prop_putCallParity :: Property
+prop_putCallParity = forAll genStrike $ \k ->
+  let fwd  = price (Forward fwdMaturity k EUR USD) testMarket testParams
+      call = price (EurOption Call k fwdMaturity EUR USD) testMarket testParams
+      put  = price (EurOption Put k fwdMaturity EUR USD) testMarket testParams
+  in counterexample
+       ("K = " ++ show k ++ ", forward = " ++ show fwd ++
+        ", call - put = " ++ show (call - put)) $
+     abs (fwd - (call - put)) < 1e-10
+
+-- | Property: struck at the CIP forward rate, the forward is worth zero
+prop_forwardAtFairRateIsZero :: Property
+prop_forwardAtFairRateIsZero =
+  let fair = evalObservable (FwdRate "EUR" "USD" fwdMaturity) testMarket
+               (valuationDate testParams)
+      v = price (Forward fwdMaturity fair EUR USD) testMarket testParams
+  in counterexample ("fair = " ++ show fair ++ ", value = " ++ show v) $
+     abs v < 1e-12
+
+-- | Property: value is linear in the fixed rate with slope -B_ccy2 (in numeraire)
+prop_forwardDependsOnStrike :: Property
+prop_forwardDependsOnStrike = forAll genStrike $ \k1 -> forAll genStrike $ \k2 ->
+  let v k = price (Forward fwdMaturity k EUR USD) testMarket testParams
+      bUsd = price (ZCB USD fwdMaturity) testMarket testParams
+  in counterexample ("v(k1) = " ++ show (v k1) ++ ", v(k2) = " ++ show (v k2)) $
+     abs ((v k1 - v k2) + (k1 - k2) * bUsd) < 1e-12
 
 -- | Structural equality for contracts (ignoring observables for simplicity)
 -- Handles associativity and commutativity of Combine by comparing multisets
