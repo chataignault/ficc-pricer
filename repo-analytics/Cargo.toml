@@ -1,0 +1,8 @@
+[package]
+name = "repo-analytics"
+version = "0.1.0"
+edition = "2021"
+description = "Standalone repo market analytics: trade economics, implied repo & carry, margining, term structure"
+
+[dependencies]
+chrono = { version = "0.4", default-features = false, features = ["std"] }

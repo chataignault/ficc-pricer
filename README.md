@@ -20,6 +20,9 @@ Minimalist pricing library using algebraic data types to construct complex FX de
 cabal build
 cabal test
 cabal run fx-pricer-example
+
+# repo analytics (Rust)
+cd repo-analytics && cargo test && cargo run --example repo_report
 ```
 
 ## Structure
@@ -75,6 +78,14 @@ Short term rate models for $r_t$ :
 - [ ] G2 ++,
 - [ ] CIR ++,
 - [ ] CIR Hull-White extended,
+
+**Repo roadmap :** (Rust crate in `repo-analytics/`, see its README)
+- [x] trade economics: cash amount, haircut / initial margin, repo interest, repurchase price,
+- [x] implied repo rate, bond forward price via repo, carry,
+- [x] mark-to-market, margin calls, repo & collateral DV01, specialness,
+- [x] GC repo curve, forward repo rates, compounded overnight vs term, specials per ISIN,
+- [ ] feed repo / GC rates and haircuts from the market gateway,
+- [ ] bond futures net basis & CTD,
 
 **Keep in mind :**
 - the foward and backward Kolmogorov equations,
